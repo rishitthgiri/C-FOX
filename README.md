@@ -63,80 +63,6 @@ Before you begin, ensure you have the following installed:
 - **npm** or **yarn**
 - **Anthropic API Key** (for AI features)
 
-## Installation
-
-### 1. Clone the repository
-```bash
-git clone https://github.com/yourusername/c-fox.git
-cd c-fox
-```
-
-### 2. Install Frontend Dependencies
-```bash
-npm install
-```
-
-### 3. Install Backend Dependencies
-```bash
-cd backend
-npm install
-cd ..
-```
-
-### 4. Set Up MongoDB
-```bash
-# Start MongoDB service
-# Windows: MongoDB starts automatically after installation
-# Mac: brew services start mongodb-community
-# Linux: sudo systemctl start mongod
-
-# Verify MongoDB is running
-mongosh
-```
-
-### 5. Configure Environment Variables
-
-Create `backend/.env` file:
-```env
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/cfox_db
-JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
-NODE_ENV=development
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
-```
-
-**Important:** 
-- Get your Anthropic API key from: https://console.anthropic.com/
-- Change `JWT_SECRET` to a secure random string
-- Never commit `.env` file to version control
-
-## Running the Application
-
-### Development Mode
-
-**Terminal 1 - Backend:**
-```bash
-cd backend
-npm run dev
-```
-Backend runs on `http://localhost:5000`
-
-**Terminal 2 - Frontend:**
-```bash
-npm run dev
-```
-Frontend runs on `http://localhost:3000`
-
-### Production Build
-```bash
-# Build frontend
-npm run build
-
-# Start backend in production
-cd backend
-npm start
-```
-
 ## Project Structure
 ```
 c-fox/
@@ -287,12 +213,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Contact
 
 For questions or support, please open an issue on GitHub.
-
-## Acknowledgments
-
-- Claude AI by Anthropic for intelligent financial insights
-- MongoDB for robust data storage
-- React community for amazing tools and libraries
 
 ---
 
