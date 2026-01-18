@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
-import { Send, Bot, User } from 'lucide-react'
-import { askAI } from '../utils/aiService'
-import LoadingSpinner from './LoadingSpinner'
+import React, { useState } from 'react';
+import { Send, Bot, User } from 'lucide-react';
+import { aiAPI } from '../services/api';
+import LoadingSpinner from './LoadingSpinner';
 
 function ChatInterface({ financialData, businessContext, metrics, forecast }) {
   const [messages, setMessages] = useState([
@@ -14,37 +14,37 @@ function ChatInterface({ financialData, businessContext, metrics, forecast }) {
 - When should we start fundraising?
 - How can we extend our runway?`
     }
-  ])
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
+  ]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSend = async () => {
-    if (!input.trim() || loading) return
+    if (!input.trim() || loading) return;
 
-    const userMessage = { role: 'user', content: input }
-    setMessages(prev => [...prev, userMessage])
-    setInput('')
-    setLoading(true)
+    const userMessage = { role: 'user', content: input };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
+    setLoading(true);
 
     try {
-      const response = await askAI(input, financialData, businessContext, metrics, forecast)
-      setMessages(prev => [...prev, { role: 'assistant', content: response }])
+      const response = await aiAPI.ask(input, financialData, businessContext, metrics, forecast);
+      setMessages(prev => [...prev, { role: 'assistant', content: response.answer }]);
     } catch (error) {
       setMessages(prev => [...prev, { 
         role: 'assistant', 
         content: 'I apologize, but I encountered an error processing your request. Please try again.' 
-      }])
+      }]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
+      e.preventDefault();
+      handleSend();
     }
-  }
+  };
 
   return (
     <div className="card" style={{ height: '600px', display: 'flex', flexDirection: 'column' }}>
@@ -130,7 +130,7 @@ function ChatInterface({ financialData, businessContext, metrics, forecast }) {
         </button>
       </div>
     </div>
-  )
+  );
 }
 
-export default ChatInterface
+export default ChatInterface;

@@ -1,25 +1,41 @@
-import React, { useState, useEffect } from 'react'
-import MetricsPanel from './MetricsPanel'
-import ForecastChart from './ForecastChart'
-import ChatInterface from './ChatInterface'
-import ScenarioBuilder from './ScenarioBuilder'
-import { calculateMetrics } from '../utils/calculations'
-import { generateForecast } from '../utils/forecasting'
+import React, { useState, useEffect } from 'react';
+import { companyAPI } from '../services/api';
+import MetricsPanel from './MetricsPanel';
+import ForecastChart from './ForecastChart';
+import ChatInterface from './ChatInterface';
+import ScenarioBuilder from './ScenarioBuilder';
+import { ArrowLeft } from 'lucide-react';
 
-function Dashboard({ financialData, businessContext }) {
-  const [metrics, setMetrics] = useState(null)
-  const [forecast, setForecast] = useState(null)
-  const [activeTab, setActiveTab] = useState('overview')
+function Dashboard({ companyId, financialData: initialFinancialData, businessContext, onBack }) {
+  const [metrics, setMetrics] = useState(null);
+  const [forecast, setForecast] = useState(null);
+  const [financialData, setFinancialData] = useState(initialFinancialData);
+  const [activeTab, setActiveTab] = useState('overview');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const calculatedMetrics = calculateMetrics(financialData, businessContext)
-    const forecastData = generateForecast(financialData, businessContext)
-    
-    setMetrics(calculatedMetrics)
-    setForecast(forecastData)
-  }, [financialData, businessContext])
+    loadDashboardData();
+  }, [companyId]);
 
-  if (!metrics || !forecast) {
+  const loadDashboardData = async () => {
+    try {
+      const [metricsData, forecastData, companyData] = await Promise.all([
+        companyAPI.getMetrics(companyId),
+        companyAPI.getForecast(companyId),
+        companyAPI.getById(companyId)
+      ]);
+
+      setMetrics(metricsData.metrics);
+      setForecast(forecastData.forecast);
+      setFinancialData(companyData.financialData);
+    } catch (error) {
+      alert('Failed to load dashboard data: ' + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
     return (
       <div style={{ textAlign: 'center', padding: '4rem' }}>
         <div className="animate-spin" style={{
@@ -34,11 +50,35 @@ function Dashboard({ financialData, businessContext }) {
           Analyzing your financial data...
         </p>
       </div>
-    )
+    );
+  }
+
+  if (!metrics || !forecast) {
+    return (
+      <div style={{ textAlign: 'center', padding: '4rem' }}>
+        <p style={{ color: 'white', fontSize: '1.1rem' }}>
+          No data available. Please upload financial data first.
+        </p>
+      </div>
+    );
   }
 
   return (
     <div className="fade-in">
+      <button
+        onClick={onBack}
+        className="btn-secondary"
+        style={{
+          marginBottom: '1rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem'
+        }}
+      >
+        <ArrowLeft size={18} />
+        Back to Companies
+      </button>
+
       <div style={{
         background: 'rgba(255, 255, 255, 0.95)',
         borderRadius: '12px',
@@ -115,7 +155,7 @@ function Dashboard({ financialData, businessContext }) {
         />
       )}
     </div>
-  )
+  );
 }
 
-export default Dashboard
+export default Dashboard;

@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
-import { ArrowRight } from 'lucide-react'
+import React, { useState, useEffect } from 'react';
+import { ArrowRight } from 'lucide-react';
 
-function BusinessContext({ onSubmit }) {
+function BusinessContext({ onSubmit, initialData }) {
   const [context, setContext] = useState({
     companyName: '',
     stage: 'seed',
@@ -9,16 +9,22 @@ function BusinessContext({ onSubmit }) {
     currentCash: 500000,
     growthTarget: 20,
     industry: 'saas'
-  })
+  });
+
+  useEffect(() => {
+    if (initialData) {
+      setContext(initialData);
+    }
+  }, [initialData]);
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    onSubmit(context)
-  }
+    e.preventDefault();
+    onSubmit(context);
+  };
 
   const handleChange = (field, value) => {
-    setContext(prev => ({ ...prev, [field]: value }))
-  }
+    setContext(prev => ({ ...prev, [field]: value }));
+  };
 
   return (
     <div className="fade-in" style={{ maxWidth: '700px', margin: '0 auto' }}>
@@ -137,7 +143,7 @@ function BusinessContext({ onSubmit }) {
         </form>
       </div>
     </div>
-  )
+  );
 }
 
-export default BusinessContext
+export default BusinessContext;

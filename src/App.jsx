@@ -1,37 +1,51 @@
-import React, { useState } from 'react'
-import Dashboard from './components/Dashboard'
-import DataUpload from './components/DataUpload'
-import BusinessContext from './components/BusinessContext'
-import { Building2 } from 'lucide-react'
+import React, { useState } from 'react';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
+import Login from './components/Login';
+import Register from './components/Register';
+import CompanySelector from './components/CompanySelector';
+import CompanyWorkflow from './components/CompanyWorkflow';
+import { Building2, LogOut, Moon, Sun } from 'lucide-react';
 
-function App() {
-  const [step, setStep] = useState(1)
-  const [financialData, setFinancialData] = useState(null)
-  const [businessContext, setBusinessContext] = useState(null)
+function AppContent() {
+  const { user, logout, loading } = useAuth();
+  const { isDark, toggleTheme, colors } = useTheme();
+  const [showRegister, setShowRegister] = useState(false);
+  const [selectedCompanyId, setSelectedCompanyId] = useState(null);
+  const [creatingNew, setCreatingNew] = useState(false);
 
-  const handleDataUpload = (data) => {
-    setFinancialData(data)
-    setStep(2)
+  if (loading) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: colors.bgGradient,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div className="animate-spin" style={{
+          width: '48px',
+          height: '48px',
+          border: '4px solid rgba(255,255,255,0.3)',
+          borderTopColor: 'white',
+          borderRadius: '50%'
+        }} />
+      </div>
+    );
   }
 
-  const handleContextSubmit = (context) => {
-    setBusinessContext(context)
-    setStep(3)
-  }
-
-  const handleReset = () => {
-    setStep(1)
-    setFinancialData(null)
-    setBusinessContext(null)
-  }
+  const handleBack = () => {
+    setSelectedCompanyId(null);
+    setCreatingNew(false);
+  };
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+    <div style={{ minHeight: '100vh', background: colors.bgGradient }}>
       <nav style={{
-        background: 'rgba(255, 255, 255, 0.95)',
+        background: colors.navBg,
         backdropFilter: 'blur(10px)',
         padding: '1rem 2rem',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
+        boxShadow: colors.shadow
       }}>
         <div style={{
           maxWidth: '1400px',
@@ -41,32 +55,85 @@ function App() {
           justifyContent: 'space-between'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Building2 size={32} color="#667eea" />
+            <Building2 size={32} color="#0891b2" />
             <div>
-              <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1a202c' }}>C-FOX</h1>
-              <p style={{ fontSize: '0.75rem', color: '#718096' }}>AI CFO Copilot</p>
+              <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: colors.textPrimary }}>C-FOX</h1>
+              <p style={{ fontSize: '0.75rem', color: colors.textSecondary }}>AI CFO Copilot</p>
             </div>
           </div>
-          {step === 3 && (
-            <button onClick={handleReset} className="btn-secondary" style={{ padding: '0.5rem 1rem' }}>
-              Start Over
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <button
+              onClick={toggleTheme}
+              style={{
+                background: isDark ? '#334155' : '#f0f9ff',
+                color: isDark ? '#22d3ee' : '#0891b2',
+                padding: '0.5rem',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.2s'
+              }}
+              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {isDark ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-          )}
+            {user && (
+              <>
+                <span style={{ color: colors.textSecondary, fontWeight: '500' }}>{user.name}</span>
+                <button
+                  onClick={logout}
+                  className="btn-secondary"
+                  style={{
+                    padding: '0.5rem 1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  <LogOut size={18} />
+                  Logout
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </nav>
 
       <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '2rem' }}>
-        {step === 1 && <DataUpload onDataUpload={handleDataUpload} />}
-        {step === 2 && <BusinessContext onSubmit={handleContextSubmit} />}
-        {step === 3 && (
-          <Dashboard 
-            financialData={financialData} 
-            businessContext={businessContext}
+        {!user ? (
+          showRegister ? (
+            <Register onToggle={() => setShowRegister(false)} />
+          ) : (
+            <Login onToggle={() => setShowRegister(true)} />
+          )
+        ) : selectedCompanyId || creatingNew ? (
+          <CompanyWorkflow
+            companyId={selectedCompanyId}
+            isNew={creatingNew}
+            onBack={handleBack}
+          />
+        ) : (
+          <CompanySelector
+            onSelectCompany={setSelectedCompanyId}
+            onCreateNew={() => setCreatingNew(true)}
           />
         )}
       </main>
     </div>
-  )
+  );
 }
 
-export default App
+function App() {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ThemeProvider>
+  );
+}
+
+export default App;

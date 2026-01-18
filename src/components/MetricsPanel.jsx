@@ -1,5 +1,5 @@
-import React from 'react'
-import { TrendingUp, TrendingDown, DollarSign, Calendar, Users, AlertCircle } from 'lucide-react'
+import React from 'react';
+import { TrendingUp, TrendingDown, DollarSign, Calendar, Users, AlertCircle, Target } from 'lucide-react';
 
 function MetricsPanel({ metrics, businessContext }) {
   const formatCurrency = (value) => {
@@ -8,15 +8,15 @@ function MetricsPanel({ metrics, businessContext }) {
       currency: 'USD',
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
-    }).format(value)
-  }
+    }).format(value);
+  };
 
   const formatNumber = (value) => {
     return new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 1,
       maximumFractionDigits: 1
-    }).format(value)
-  }
+    }).format(value);
+  };
 
   const metricCards = [
     {
@@ -60,8 +60,22 @@ function MetricsPanel({ metrics, businessContext }) {
       icon: Users,
       color: '#ed8936',
       description: 'Average operating costs'
+    },
+    {
+      title: 'Goal Revenue',
+      value: formatCurrency(metrics.goalRevenue),
+      icon: Target,
+      color: '#9f7aea',
+      description: `Target by ${metrics.timeline}`
+    },
+    {
+      title: 'Progress to Goal',
+      value: `${formatNumber(metrics.percentToGoal)}%`,
+      icon: Target,
+      color: metrics.percentToGoal >= 100 ? '#48bb78' : metrics.percentToGoal >= 75 ? '#38b2ac' : '#ed8936',
+      description: `${formatCurrency(metrics.revenueGap)} to go`
     }
-  ]
+  ];
 
   return (
     <div>
@@ -72,7 +86,7 @@ function MetricsPanel({ metrics, businessContext }) {
         marginBottom: '2rem'
       }}>
         {metricCards.map((card, index) => {
-          const Icon = card.icon
+          const Icon = card.icon;
           return (
             <div key={index} className="metric-card">
               <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
@@ -96,7 +110,7 @@ function MetricsPanel({ metrics, businessContext }) {
                 {card.description}
               </p>
             </div>
-          )
+          );
         })}
       </div>
 
@@ -108,7 +122,8 @@ function MetricsPanel({ metrics, businessContext }) {
           padding: '1.5rem',
           display: 'flex',
           gap: '1rem',
-          alignItems: 'flex-start'
+          alignItems: 'flex-start',
+          marginBottom: '1rem'
         }}>
           <AlertCircle size={24} color="#e53e3e" style={{ flexShrink: 0, marginTop: '0.2rem' }} />
           <div>
@@ -121,8 +136,30 @@ function MetricsPanel({ metrics, businessContext }) {
           </div>
         </div>
       )}
+
+      {metrics.percentToGoal < 50 && (
+        <div style={{
+          background: '#fffaf0',
+          border: '2px solid #fbd38d',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          display: 'flex',
+          gap: '1rem',
+          alignItems: 'flex-start'
+        }}>
+          <Target size={24} color="#ed8936" style={{ flexShrink: 0, marginTop: '0.2rem' }} />
+          <div>
+            <h4 style={{ fontWeight: '700', color: '#c05621', marginBottom: '0.5rem' }}>
+              Goal Achievement Status
+            </h4>
+            <p style={{ color: '#744210', lineHeight: '1.6' }}>
+              You're at {formatNumber(metrics.percentToGoal)}% of your goal revenue of {formatCurrency(metrics.goalRevenue)} by {metrics.timeline}. You need {formatCurrency(metrics.revenueGap)} more in monthly revenue to reach your target.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
-  )
+  );
 }
 
-export default MetricsPanel
+export default MetricsPanel;
