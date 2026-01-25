@@ -9,7 +9,13 @@ const aiRoutes = require('./routes/ai');
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:3000',
+    'https://c-fox.vercel.app',  // Replace with YOUR Vercel URL
+  ],
+  credentials: true
+}));
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
